@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>K-Pop Song Finder</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>🎶 K-Pop Song Finder</h1>
+    <p>Search your favorite K-Pop songs instantly</p>
+  </header>
+
+  <main>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search K-Pop songs..." />
+      <button id="searchBtn">Search</button>
+      <button id="luckyBtn">I’m Lucky</button>
+    </div>
+
+    <div class="filters">
+      <label><input type="checkbox" id="kpopOnly" checked /> Strict K-Pop only</label>
+      <label><input type="checkbox" id="previewOnly" /> Previews only</label>
+      <select id="sortSelect">
+        <option value="relevance">Sort: Relevance</option>
+        <option value="newest">Newest</option>
+        <option value="oldest">Oldest</option>
+      </select>
+    </div>
+
+    <section id="results"></section>
+  </main>
+
+  <footer>
+    <p>✨ Built with free APIs & love for K-Pop ✨</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
