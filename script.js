@@ -87,7 +87,8 @@ async function searchSongs(query, lucky = false) {
       logActivity(`Rendering ${songs.length} songs.`);
       renderSongs(songs);
     }
-  } catch (err) {
+  } catch (err)
+ {
     logActivity("An error occurred while searching.");
     resultsContainer.innerHTML = "<p>Error fetching songs.</p>";
     console.error(err);
@@ -151,7 +152,7 @@ async function getLyrics(artist, title) {
   const url = `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`;
 
   try {
-    const res = await fetch(url);
+    const res = await puter.net.fetch(url);
     if (!res.ok) {
       logActivity(`Lyrics not found for "${title}".`);
       displayLyricsModal("Sorry, lyrics for this song could not be found. 😢");
