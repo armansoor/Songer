@@ -5,34 +5,52 @@ const resultsContainer = document.getElementById("results");
 const kpopOnly = document.getElementById("kpopOnly");
 const previewOnly = document.getElementById("previewOnly");
 const sortSelect = document.getElementById("sortSelect");
+const countrySelect = document.getElementById("countrySelect");
+
+// Log elements
+const logList = document.getElementById("logList");
+
+// Modal elements
+const lyricsModal = document.getElementById("lyricsModal");
+const lyricsText = document.getElementById("lyricsText");
+const closeBtn = document.querySelector(".close-btn");
 
 async function searchSongs(query, lucky = false) {
+  clearLog();
+  logActivity(`Searching for "${query}"...`);
   resultsContainer.innerHTML = "<p>🔍 Searching...</p>";
+  const country = countrySelect.value;
   const url = `https://itunes.apple.com/search?term=${encodeURIComponent(
     query
-  )}&entity=song&limit=20&country=kr`;
+  )}&entity=song&limit=20&country=${country}`;
 
   try {
     const res = await fetch(url);
     const data = await res.json();
 
     let songs = data.results;
+    logActivity(`Found ${songs.length} initial results from API.`);
 
     // Filter for K-Pop only
     if (kpopOnly.checked) {
+      const originalCount = songs.length;
       songs = songs.filter(
         (s) =>
           (s.primaryGenreName && s.primaryGenreName.toLowerCase().includes("k-pop")) ||
           (s.collectionName && s.collectionName.toLowerCase().includes("k-pop"))
       );
+      logActivity(`Filtered for K-Pop only: ${originalCount} -> ${songs.length} songs.`);
     }
 
     // Filter preview-only
     if (previewOnly.checked) {
+      const originalCount = songs.length;
       songs = songs.filter((s) => s.previewUrl);
+      logActivity(`Filtered for previews only: ${originalCount} -> ${songs.length} songs.`);
     }
 
     // Sort
+    logActivity(`Sorting results by "${sortSelect.options[sortSelect.selectedIndex].text}".`);
     if (sortSelect.value === "recommended") {
       songs.forEach(song => {
         let score = 0;
@@ -56,20 +74,28 @@ async function searchSongs(query, lucky = false) {
     }
 
     if (!songs.length) {
+      logActivity("No results to display after filtering.");
       resultsContainer.innerHTML = "<p>No results found 😢</p>";
       return;
     }
 
     // Lucky mode
     if (lucky) {
+      logActivity("Feeling lucky! Picking one random song.");
       renderSongs([songs[Math.floor(Math.random() * songs.length)]]);
     } else {
+      logActivity(`Rendering ${songs.length} songs.`);
       renderSongs(songs);
     }
   } catch (err) {
+    logActivity("An error occurred while searching.");
     resultsContainer.innerHTML = "<p>Error fetching songs.</p>";
     console.error(err);
   }
+}
+
+function escapeHTML(str) {
+    return str.replace(/'/g, "&apos;").replace(/"/g, "&quot;");
 }
 
 function renderSongs(songs) {
@@ -95,12 +121,54 @@ function renderSongs(songs) {
         <a href="https://twitter.com/intent/tweet?text=Listening to ${
           song.trackName
         } by ${song.artistName} 🎶" target="_blank">Share</a>
+        <button onclick="getLyrics('${escapeHTML(song.artistName)}', '${escapeHTML(song.trackName)}')">Show Lyrics</button>
       </div>
     `;
     resultsContainer.appendChild(card);
   });
 }
 
+function clearLog() {
+  logList.innerHTML = "";
+}
+
+function logActivity(message) {
+  const item = document.createElement("li");
+  const timestamp = new Date().toLocaleTimeString();
+  item.innerHTML = `[${timestamp}] ${message}`;
+  logList.appendChild(item);
+  logList.scrollTop = logList.scrollHeight; // Auto-scroll to bottom
+}
+
+function displayLyricsModal(lyrics) {
+  lyricsText.innerHTML = lyrics;
+  lyricsModal.style.display = "block";
+}
+
+async function getLyrics(artist, title) {
+  logActivity(`Fetching lyrics for "${title}" by ${artist}...`);
+  displayLyricsModal('Fetching lyrics...');
+  const url = `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      logActivity(`Lyrics not found for "${title}".`);
+      displayLyricsModal("Sorry, lyrics for this song could not be found. 😢");
+      return;
+    }
+    const data = await res.json();
+    const lyrics = data.lyrics ? data.lyrics.replace(/(\r\n|\r|\n)/g, '<br>') : "No lyrics found.";
+    logActivity(`Lyrics found for "${title}".`);
+    displayLyricsModal(lyrics);
+  } catch (err) {
+    logActivity(`An error occurred while fetching lyrics for "${title}".`);
+    console.error("Error fetching lyrics:", err);
+    displayLyricsModal("An error occurred while fetching lyrics.");
+  }
+}
+
+// Event Listeners
 searchBtn.addEventListener("click", () => {
   if (searchInput.value.trim()) {
     searchSongs(searchInput.value.trim());
@@ -118,3 +186,14 @@ searchInput.addEventListener("keypress", (e) => {
     searchSongs(searchInput.value.trim());
   }
 });
+
+// Modal event listeners
+closeBtn.onclick = function() {
+  lyricsModal.style.display = "none";
+}
+
+window.onclick = function(event) {
+  if (event.target == lyricsModal) {
+    lyricsModal.style.display = "none";
+  }
+}

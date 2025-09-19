@@ -27,10 +27,27 @@
         <option value="newest">Newest</option>
         <option value="oldest">Oldest</option>
       </select>
+      <select id="countrySelect">
+        <option value="kr">Country: Korea</option>
+        <option value="us">Country: USA</option>
+        <option value="jp">Country: Japan</option>
+      </select>
     </div>
 
     <section id="results"></section>
+
+    <section id="activityLog" class="log-container">
+      <h2>Activity Log</h2>
+      <ul id="logList"></ul>
+    </section>
   </main>
+
+  <div id="lyricsModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <p id="lyricsText"></p>
+    </div>
+  </div>
 
   <footer>
     <p>✨ Built with free APIs & love for K-Pop ✨</p>
