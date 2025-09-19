@@ -62,7 +62,7 @@ header p {
 .filters {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: space-evenly;
   gap: 1rem;
   margin: 0.5rem 0 1rem;
 }
