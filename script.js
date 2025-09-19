@@ -22,8 +22,8 @@ async function searchSongs(query, lucky = false) {
     if (kpopOnly.checked) {
       songs = songs.filter(
         (s) =>
-          s.primaryGenreName.toLowerCase().includes("k-pop") ||
-          s.collectionName.toLowerCase().includes("k-pop")
+          (s.primaryGenreName && s.primaryGenreName.toLowerCase().includes("k-pop")) ||
+          (s.collectionName && s.collectionName.toLowerCase().includes("k-pop"))
       );
     }
 
@@ -33,7 +33,23 @@ async function searchSongs(query, lucky = false) {
     }
 
     // Sort
-    if (sortSelect.value === "newest") {
+    if (sortSelect.value === "recommended") {
+      songs.forEach(song => {
+        let score = 0;
+        if (song.primaryGenreName && song.primaryGenreName.toLowerCase() === "k-pop") {
+          score += 100;
+        }
+        if (song.collectionName && song.collectionName.toLowerCase().includes("k-pop")) {
+          score += 10;
+        }
+        if (song.releaseDate) {
+            // Add score based on release date (newer songs get higher scores)
+            score += new Date(song.releaseDate).getTime() / 10000000000;
+        }
+        song.kpopScore = score;
+      });
+      songs.sort((a, b) => b.kpopScore - a.kpopScore);
+    } else if (sortSelect.value === "newest") {
       songs.sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate));
     } else if (sortSelect.value === "oldest") {
       songs.sort((a, b) => new Date(a.releaseDate) - new Date(b.releaseDate));
