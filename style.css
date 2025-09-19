@@ -189,3 +189,34 @@ footer {
   text-decoration: none;
   cursor: pointer;
 }
+
+/* Activity Log */
+.log-container {
+  margin: 1rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 15px;
+}
+
+.log-container h2 {
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+#logList {
+  list-style-type: none;
+  height: 150px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.5rem;
+  border-radius: 10px;
+}
+
+#logList li {
+  padding: 0.25rem 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#logList li:last-child {
+  border-bottom: none;
+}
