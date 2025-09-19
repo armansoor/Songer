@@ -5,12 +5,19 @@ const resultsContainer = document.getElementById("results");
 const kpopOnly = document.getElementById("kpopOnly");
 const previewOnly = document.getElementById("previewOnly");
 const sortSelect = document.getElementById("sortSelect");
+const countrySelect = document.getElementById("countrySelect");
+
+// Modal elements
+const lyricsModal = document.getElementById("lyricsModal");
+const lyricsText = document.getElementById("lyricsText");
+const closeBtn = document.querySelector(".close-btn");
 
 async function searchSongs(query, lucky = false) {
   resultsContainer.innerHTML = "<p>🔍 Searching...</p>";
+  const country = countrySelect.value;
   const url = `https://itunes.apple.com/search?term=${encodeURIComponent(
     query
-  )}&entity=song&limit=20&country=kr`;
+  )}&entity=song&limit=20&country=${country}`;
 
   try {
     const res = await fetch(url);
@@ -72,6 +79,10 @@ async function searchSongs(query, lucky = false) {
   }
 }
 
+function escapeHTML(str) {
+    return str.replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+}
+
 function renderSongs(songs) {
   resultsContainer.innerHTML = "";
   songs.forEach((song) => {
@@ -95,12 +106,38 @@ function renderSongs(songs) {
         <a href="https://twitter.com/intent/tweet?text=Listening to ${
           song.trackName
         } by ${song.artistName} 🎶" target="_blank">Share</a>
+        <button onclick="getLyrics('${escapeHTML(song.artistName)}', '${escapeHTML(song.trackName)}')">Show Lyrics</button>
       </div>
     `;
     resultsContainer.appendChild(card);
   });
 }
 
+function displayLyricsModal(lyrics) {
+  lyricsText.innerHTML = lyrics;
+  lyricsModal.style.display = "block";
+}
+
+async function getLyrics(artist, title) {
+  displayLyricsModal('Fetching lyrics...');
+  const url = `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      displayLyricsModal("Sorry, lyrics for this song could not be found. 😢");
+      return;
+    }
+    const data = await res.json();
+    const lyrics = data.lyrics ? data.lyrics.replace(/(\r\n|\r|\n)/g, '<br>') : "No lyrics found.";
+    displayLyricsModal(lyrics);
+  } catch (err) {
+    console.error("Error fetching lyrics:", err);
+    displayLyricsModal("An error occurred while fetching lyrics.");
+  }
+}
+
+// Event Listeners
 searchBtn.addEventListener("click", () => {
   if (searchInput.value.trim()) {
     searchSongs(searchInput.value.trim());
@@ -118,3 +155,14 @@ searchInput.addEventListener("keypress", (e) => {
     searchSongs(searchInput.value.trim());
   }
 });
+
+// Modal event listeners
+closeBtn.onclick = function() {
+  lyricsModal.style.display = "none";
+}
+
+window.onclick = function(event) {
+  if (event.target == lyricsModal) {
+    lyricsModal.style.display = "none";
+  }
+}
